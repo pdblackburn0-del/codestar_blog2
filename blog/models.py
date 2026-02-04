@@ -5,13 +5,34 @@ class StatusChoices(models.TextChoices):
     DRAFT = '0', 'Draft'
     PUBLISHED = '1', 'Published'
 
-# Create your models here.
+
 class Post(models.Model):
     title = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     author = models.ForeignKey(
-    User, on_delete=models.CASCADE, related_name="blog_posts"
-)
+        User, on_delete=models.CASCADE, related_name="blog_posts"
+    )
     content = models.TextField()
+    excerpt = models.TextField(blank=True)
     created_on = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=1, choices=StatusChoices.choices, default=StatusChoices.DRAFT)
+    status = models.CharField(
+        max_length=1, choices=StatusChoices.choices, default=StatusChoices.DRAFT
+    )
+
+    def __str__(self):
+        return self.title
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name="comments"
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="blog_comments"
+    )
+    body = models.TextField()
+    created_on = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.post}"
